@@ -175,7 +175,11 @@
     if (!ensureConfigured()) { render(); return; }
     if (!state.selectedSchemas.length) { state.error = "Please select at least one context"; render(); return; }
 
-    state.loading = true; state.error = null; state.currentPrompt = { status: 'pending' }; render();
+    state.loading = true; state.error = null; state.currentPrompt = { status: 'pending' };
+    // Show placeholders for File Context and Questions while processing
+    state.showFileContext = true;
+    state.showQuestions = true;
+    render();
     try {
       const payload = { prompt: state.originalPrompt.trim() };
       if (state.selectedSchemas.length) payload.schemaIds = state.selectedSchemas;
@@ -513,7 +517,7 @@
             </div>
           </div>` : ''}
 
-        ${state.fileContexts.length ? `
+        ${(state.fileContexts.length || (state.currentPrompt && (state.currentPrompt.status === 'pending' || state.currentPrompt.status === 'processing'))) ? `
           <div class="box" style="margin-top:12px;border-color:#bfdbfe;">
             <button id="ctx-filectx-toggle" class="box-body row" style="width:100%;justify-content:space-between;background:#eff6ff;">
               <div class="row" style="gap:6px;">
@@ -524,20 +528,29 @@
             </button>
             ${state.showFileContext ? `
               <div class="box-body" style="max-height:256px;overflow:auto;padding-top:6px;">
-                ${state.fileContexts.map(ctx => `
+                ${state.fileContexts.length ? state.fileContexts.map(ctx => `
                   <div class="box" data-filectx="${ctx.id}" style="padding:8px;margin-bottom:8px;border-color:${ctx.selected ? '#93c5fd' : '#e5e7eb'};background:${ctx.selected ? '#eff6ff' : '#fff'};cursor:pointer;">
                     <div class="row" style="justify-content:space-between;margin-bottom:4px;">
                       <span class="muted" style="color:#1d4ed8;">${escapeHtml(ctx.source)}</span>
                       ${ctx.selected ? `<span class="status status-processing">${icon('check')} Selected</span>` : ''}
                     </div>
                     <div class="code">${escapeHtml(ctx.content)}</div>
-                  </div>`).join('')}
+                  </div>`).join('') : `
+                  <div class="row" style="gap:8px;padding:8px;">
+                    <span class="loading" style="width:16px;height:16px;border:2px solid #9ca3af;border-top-color:transparent;border-radius:50%;"></span>
+                    <div class="grow">
+                      <div style="font-size:13px;color:#374151;font-weight:600;">Retrieving file context...</div>
+                      <div class="muted-sm">This may take a few moments</div>
+                    </div>
+                    ${state.currentPrompt ? `<div class="status ${getStatusColor(state.currentPrompt.status)}">${state.currentPrompt.status}</div>` : ''}
+                  </div>
+                `}
                 ${state.fileContexts.filter(c=>c.selected).length ? `<div class="muted" style="padding-top:4px;border-top:1px solid #e5e7eb;">${state.fileContexts.filter(c=>c.selected).length} extract(s) will be added to your enhanced prompt</div>` : ''}
               </div>` : ''}
           </div>` : ''}
 
 
-        ${Array.isArray(state.questions) && state.questions.length ? `
+        ${(Array.isArray(state.questions) && state.questions.length) || (state.currentPrompt && (state.currentPrompt.status === 'pending' || state.currentPrompt.status === 'processing')) ? `
           <div class="box" style="margin-top:12px;border-color:#fed7aa;">
             <button id="ctx-qa-toggle" class="box-body row" style="width:100%;justify-content:space-between;background:#fffbeb;">
               <div class="row" style="gap:6px;">
@@ -548,15 +561,26 @@
             </button>
             ${state.showQuestions ? `
               <div class="box-body" style="padding-top:6px;">
-                ${state.questions.map((q, idx) => `
+                ${state.questions && state.questions.length ? state.questions.map((q, idx) => `
                   <div style="margin-bottom:8px;">
                     <label class="muted" style="display:block;margin-bottom:4px;color:#111827;">${escapeHtml(q.question)}</label>
                     <textarea class="input" data-qa-index="${idx}" rows="2" placeholder="${state.submittedAnswers && state.submittedAnswers.length ? 'Update your answer...' : 'Enter your answer...'}">${escapeHtml(q.answer || '')}</textarea>
-                  </div>`).join('')}
-                <div class="row" style="gap:8px;">
-                  <button id="ctx-qa-submit" class="btn btn-primary grow" ${state.submittingAnswers ? 'disabled' : ''}>${state.submittingAnswers ? 'Submitting...' : (state.submittedAnswers && state.submittedAnswers.length ? 'Update' : 'Submit')}</button>
-                  <button id="ctx-qa-skip" class="btn btn-outline">${state.submittedAnswers && state.submittedAnswers.length ? 'Cancel' : 'Skip'}</button>
-                </div>
+                  </div>`).join('') : `
+                  <div class="row" style="gap:8px;padding:8px;">
+                    <span class="loading" style="width:16px;height:16px;border:2px solid #9ca3af;border-top-color:transparent;border-radius:50%;"></span>
+                    <div class="grow">
+                      <div style="font-size:13px;color:#374151;font-weight:600;">Retrieving questions...</div>
+                      <div class="muted-sm">This may take a few moments</div>
+                    </div>
+                    ${state.currentPrompt ? `<div class="status ${getStatusColor(state.currentPrompt.status)}">${state.currentPrompt.status}</div>` : ''}
+                  </div>
+                `}
+                ${state.questions && state.questions.length ? `
+                  <div class="row" style="gap:8px;">
+                    <button id="ctx-qa-submit" class="btn btn-primary grow" ${state.submittingAnswers ? 'disabled' : ''}>${state.submittingAnswers ? 'Submitting...' : (state.submittedAnswers && state.submittedAnswers.length ? 'Update' : 'Submit')}</button>
+                    <button id="ctx-qa-skip" class="btn btn-outline">${state.submittedAnswers && state.submittedAnswers.length ? 'Cancel' : 'Skip'}</button>
+                  </div>
+                ` : ''}
               </div>` : ''}
           </div>` : ''}
 
