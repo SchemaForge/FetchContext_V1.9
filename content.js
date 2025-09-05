@@ -519,7 +519,7 @@
 
         ${(state.fileContexts.length || (state.currentPrompt && (state.currentPrompt.status === 'pending' || state.currentPrompt.status === 'processing'))) ? `
           <div class="box" style="margin-top:12px;border-color:#bfdbfe;">
-            <button id="ctx-filectx-toggle" class="box-body row" style="width:100%;justify-content:space-between;background:#eff6ff;">
+            <button id="ctx-filectx-toggle" class="box-body row" style="width:100%;justify-content:space-between;background:#eff6ff;border:none;outline:none;">
               <div class="row" style="gap:6px;">
                 <span>📄</span>
                 <span class="muted" style="color:#1d4ed8;">File Context (${state.fileContexts.filter(c=>c.selected).length}/${state.fileContexts.length} selected)</span>
@@ -552,7 +552,7 @@
 
         ${(Array.isArray(state.questions) && state.questions.length) || (state.currentPrompt && (state.currentPrompt.status === 'pending' || state.currentPrompt.status === 'processing')) ? `
           <div class="box" style="margin-top:12px;border-color:#fed7aa;">
-            <button id="ctx-qa-toggle" class="box-body row" style="width:100%;justify-content:space-between;background:#fffbeb;">
+            <button id="ctx-qa-toggle" class="box-body row" style="width:100%;justify-content:space-between;background:#fffbeb;border:none;outline:none;">
               <div class="row" style="gap:6px;">
                 <span>💬</span>
                 <span class="muted" style="color:#9a3412;">${state.submittedAnswers && state.submittedAnswers.length ? 'Update Answers' : 'Additional Questions'} (${state.questions.length})</span>
