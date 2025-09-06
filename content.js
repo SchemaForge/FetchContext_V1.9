@@ -542,7 +542,7 @@
                       <div style="font-size:13px;color:#374151;font-weight:600;">Retrieving file context...</div>
                       <div class="muted-sm">This may take a few moments</div>
                     </div>
-                    ${state.currentPrompt ? `<div class="status ${getStatusColor(state.currentPrompt.status)}">${state.currentPrompt.status}</div>` : ''}
+                    <div class="status status-pending">pending</div>
                   </div>
                 `}
                 ${state.fileContexts.filter(c=>c.selected).length ? `<div class="muted" style="padding-top:4px;border-top:1px solid #e5e7eb;">${state.fileContexts.filter(c=>c.selected).length} extract(s) will be added to your enhanced prompt</div>` : ''}
@@ -550,7 +550,7 @@
           </div>` : ''}
 
 
-        ${(Array.isArray(state.questions) && state.questions.length) || (state.currentPrompt && (state.currentPrompt.status === 'pending' || state.currentPrompt.status === 'processing')) ? `
+        ${(Array.isArray(state.questions) && state.questions.length) || (state.currentPrompt && (state.currentPrompt.status === 'pending' || state.currentPrompt.status === 'processing')) || (state.currentPrompt && state.fileContexts.length > 0 && !(state.questions && state.questions.length)) ? `
           <div class="box" style="margin-top:12px;border-color:#fed7aa;">
             <button id="ctx-qa-toggle" class="box-body row" style="width:100%;justify-content:space-between;background:#fffbeb;border:none;outline:none;">
               <div class="row" style="gap:6px;">
@@ -572,7 +572,7 @@
                       <div style="font-size:13px;color:#374151;font-weight:600;">Retrieving questions...</div>
                       <div class="muted-sm">This may take a few moments</div>
                     </div>
-                    ${state.currentPrompt ? `<div class="status ${getStatusColor(state.currentPrompt.status)}">${state.currentPrompt.status}</div>` : ''}
+                    <div class="status status-pending">pending</div>
                   </div>
                 `}
                 ${state.questions && state.questions.length ? `
