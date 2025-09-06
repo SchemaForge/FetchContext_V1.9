@@ -178,6 +178,13 @@
     state.loading = true; state.error = null; state.currentPrompt = { status: 'pending' };
     // Show placeholder for File Context while processing
     state.showFileContext = true;
+    // Force Questions section to be visible and reset any stale data
+    state.showQuestions = true;
+    state.questions = [];
+    state.submittedAnswers = [];
+    // Clear previous file context to ensure placeholder shows until new data arrives
+    state.fileContexts = [];
+    state.selectedFileExtracts = [];
     render();
     try {
       const payload = { prompt: state.originalPrompt.trim() };
@@ -549,7 +556,7 @@
           </div>` : ''}
 
 
-        ${(Array.isArray(state.questions) && state.questions.length) ? `
+        ${((Array.isArray(state.questions) && state.questions.length) || (state.currentPrompt && (state.currentPrompt.status === 'pending' || state.currentPrompt.status === 'processing'))) ? `
           <div class="box" style="margin-top:12px;border-color:#fed7aa;">
             <button id="ctx-qa-toggle" class="box-body row" style="width:100%;justify-content:space-between;background:#fffbeb;border:none;outline:none;">
               <div class="row" style="gap:6px;">
@@ -560,15 +567,26 @@
             </button>
             ${state.showQuestions ? `
               <div class="box-body" style="padding-top:6px;">
-                ${state.questions.map((q, idx) => `
-                  <div style="margin-bottom:8px;">
-                    <label class="muted" style="display:block;margin-bottom:4px;color:#111827;">${escapeHtml(q.question)}</label>
-                    <textarea class="input" data-qa-index="${idx}" rows="2" placeholder="${state.submittedAnswers && state.submittedAnswers.length ? 'Update your answer...' : 'Enter your answer...'}">${escapeHtml(q.answer || '')}</textarea>
-                  </div>`).join('')}
-                <div class="row" style="gap:8px;">
-                  <button id="ctx-qa-submit" class="btn btn-primary grow" ${state.submittingAnswers ? 'disabled' : ''}>${state.submittingAnswers ? 'Submitting...' : (state.submittedAnswers && state.submittedAnswers.length ? 'Update' : 'Submit')}</button>
-                  <button id="ctx-qa-skip" class="btn btn-outline">${state.submittedAnswers && state.submittedAnswers.length ? 'Cancel' : 'Skip'}</button>
-                </div>
+                ${state.questions.length ? `
+                  ${state.questions.map((q, idx) => `
+                    <div style="margin-bottom:8px;">
+                      <label class="muted" style="display:block;margin-bottom:4px;color:#111827;">${escapeHtml(q.question)}</label>
+                      <textarea class="input" data-qa-index="${idx}" rows="2" placeholder="${state.submittedAnswers && state.submittedAnswers.length ? 'Update your answer...' : 'Enter your answer...'}">${escapeHtml(q.answer || '')}</textarea>
+                    </div>`).join('')}
+                  <div class="row" style="gap:8px;">
+                    <button id="ctx-qa-submit" class="btn btn-primary grow" ${state.submittingAnswers ? 'disabled' : ''}>${state.submittingAnswers ? 'Submitting...' : (state.submittedAnswers && state.submittedAnswers.length ? 'Update' : 'Submit')}</button>
+                    <button id="ctx-qa-skip" class="btn btn-outline">${state.submittedAnswers && state.submittedAnswers.length ? 'Cancel' : 'Skip'}</button>
+                  </div>
+                ` : `
+                  <div class="row" style="gap:8px;padding:8px;">
+                    <span class="loading" style="width:16px;height:16px;border:2px solid #9ca3af;border-top-color:transparent;border-radius:50%;"></span>
+                    <div class="grow">
+                      <div style="font-size:13px;color:#374151;font-weight:600;">Retrieving questions...</div>
+                      <div class="muted-sm">This may take a few moments</div>
+                    </div>
+                    <div class="status status-pending">pending</div>
+                  </div>
+                `}
               </div>` : ''}
           </div>` : ''}
 
